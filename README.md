@@ -30,7 +30,7 @@ Este é um projeto Django que implementa um sistema de gestão de usuários, ses
 
 1. **Clone o repositório**:
    ```bash
-   git clone <url-do-repositorio>
+   git clone <https://github.com/pedrohoppe88/projeto_django/>
    cd projeto_django
    ```
 
@@ -86,10 +86,6 @@ Este é um projeto Django que implementa um sistema de gestão de usuários, ses
 4. Dentro de uma sessão, adicione itens e controle retiradas/devoluções.
 5. PDFs de cautela são gerados automaticamente para cada retirada/devolução.
 
-## Contribuição
-
-Sinta-se à vontade para contribuir com melhorias ou correções. Abra uma issue ou envie um pull request.
-
 ## Licença
 
-Este projeto é de uso pessoal e educacional.
+Este projeto é de uso pessoal
