@@ -100,7 +100,7 @@
         /* Cards container */
         .cards-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(320px,1fr));
+            grid-template-columns: repeat(auto-fill,minmax(450px,1fr));
             gap: 1.5rem;
         }
 
@@ -373,26 +373,32 @@
         <article class="card-item" data-nome="{{ item.nome|lower }}">
             <header class="card-header card-blue d-flex justify-content-between align-items-center">
                 {{ item.nome }}
-                <!-- Botão excluir dentro do header -->
-                <form action="{% url 'excluir_item' item.id %}" method="post" class="m-0">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-excluir"
-                        onclick="return confirm('Tem certeza que deseja excluir este item?');">
-                        ✖
-                    </button>
-                </form>
+                <!-- Botões editar e excluir dentro do header -->
+                <div class="d-flex gap-2">
+                    <a href="{% url 'editar_item' item.id %}" class="btn-editar" title="Editar Item">
+                        ✏️
+                    </a>
+                    <form action="{% url 'excluir_item' item.id %}" method="post" class="m-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-excluir"
+                            onclick="return confirm('Tem certeza que deseja excluir este item?');">
+                            ✖
+                        </button>
+                    </form>
+                </div>
             </header>
 
             <div class="card-body">
                 <div class="card-quantity">{{ item.quantidade }} cadastrados</div>
 
                 <h6>Retiradas:</h6>
-                <ul class="retirada-list">
+                <input type="text" class="form-control mb-2" placeholder="Pesquisar quem retirou..." data-item-id="{{ item.id }}" data-type="retirada" />
+                <ul class="retirada-list" data-item-id="{{ item.id }}">
                     {% for retirada in item.retiradas.all %}
-                    <li>
+                    <li data-usuario="{{ retirada.usuario.nome|lower }}">
                         <div class="retirada-info">
-                            <strong>{{ retirada.usuario.nome }}</strong> retirou 
-                            <span class="badge-quantidade">{{ retirada.quantidade }}</span> em 
+                            <strong>{{ retirada.usuario.nome }}</strong> retirou
+                            <span class="badge-quantidade">{{ retirada.quantidade }}</span> em
                             <small>{{ retirada.data_retirada|date:"d/m/Y H:i" }}</small>
                         </div>
                         <form method="post" action="{% url 'remover_retirada' retirada.id %}?next={% url 'listar_itens' sessao.id %}" class="form-remover">
@@ -409,9 +415,10 @@
                 <form method="post" action="{% url 'retirar_item' item.id %}" class="form-retirar">
                     {% csrf_token %}
                     <label for="usuario-{{ item.id }}">Quem pegou:</label>
-                    <select id="usuario-{{ item.id }}" name="usuario" required>
+                    <input type="text" class="form-control mb-2" placeholder="Pesquisar usuário..." data-item-id="{{ item.id }}" data-type="usuario" autocomplete="off" />
+                    <select id="usuario-{{ item.id }}" name="usuario" required data-item-id="{{ item.id }}">
                         {% for usuario in usuarios %}
-                        <option value="{{ usuario.id }}">{{ usuario.nome }} - {{ usuario.get_graduacao_display }}</option>
+                        <option value="{{ usuario.id }}" data-nome="{{ usuario.nome|lower }}">{{ usuario.nome }} - {{ usuario.get_graduacao_display }}</option>
                         {% endfor %}
                     </select>
 
@@ -466,6 +473,17 @@
         const inputPesquisa = document.getElementById("pesquisaItem");
         const listaItens = document.getElementById("listaItens");
 
+        // Armazenar opções originais dos selects
+        const originalOptions = {};
+        document.querySelectorAll('select[data-item-id]').forEach(select => {
+            const itemId = select.getAttribute('data-item-id');
+            originalOptions[itemId] = Array.from(select.options).map(option => ({
+                value: option.value,
+                text: option.text,
+                nome: option.getAttribute('data-nome')
+            }));
+        });
+
         inputPesquisa.addEventListener("input", () => {
             const filtro = inputPesquisa.value.toLowerCase();
             const cards = listaItens.querySelectorAll("article.card-item");
@@ -478,6 +496,42 @@
                     card.style.display = "none";
                 }
             });
+        });
+
+        // Pesquisa dentro dos cards
+        document.addEventListener("input", (e) => {
+            if (e.target.hasAttribute("data-item-id") && e.target.hasAttribute("data-type")) {
+                const itemId = e.target.getAttribute("data-item-id");
+                const type = e.target.getAttribute("data-type");
+                const filtro = e.target.value.toLowerCase();
+
+                if (type === "retirada") {
+                    // Filtrar lista de retiradas
+                    const retiradaList = document.querySelector(`ul.retirada-list[data-item-id="${itemId}"]`);
+                    const retiradas = retiradaList.querySelectorAll("li[data-usuario]");
+
+                    retiradas.forEach(retirada => {
+                        const usuario = retirada.getAttribute("data-usuario");
+                        if (usuario.includes(filtro)) {
+                            retirada.style.display = "";
+                        } else {
+                            retirada.style.display = "none";
+                        }
+                    });
+                } else if (type === "usuario") {
+                    // Filtrar opções do select dinamicamente
+                    const select = document.querySelector(`select[data-item-id="${itemId}"]`);
+                    select.innerHTML = '';
+                    const filtered = originalOptions[itemId].filter(opt => opt.nome.includes(filtro));
+                    filtered.forEach(opt => {
+                        const option = document.createElement('option');
+                        option.value = opt.value;
+                        option.text = opt.text;
+                        option.setAttribute('data-nome', opt.nome);
+                        select.appendChild(option);
+                    });
+                }
+            }
         });
     </script>
 

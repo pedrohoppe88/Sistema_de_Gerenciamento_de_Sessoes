@@ -2,17 +2,25 @@ from django.db import models
 from django.utils.crypto import get_random_string
 
 class Usuario(models.Model):
-    # Lista de graduações
+    # Lista de graduações do Exército Brasileiro
     GRADUACAO_CHOICES = [
         ('soldado', 'Soldado'),
         ('cabo', 'Cabo'),
-        ('sargento', 'Sargento'),
+        ('3_sargento', '3º Sargento'),
+        ('2_sargento', '2º Sargento'),
+        ('1_sargento', '1º Sargento'),
         ('subtenente', 'Subtenente'),
-        ('tenente', 'Tenente'),
+        ('aspirante', 'Aspirante'),
+        ('2_tenente', '2º Tenente'),
+        ('1_tenente', '1º Tenente'),
         ('capitao', 'Capitão'),
         ('major', 'Major'),
         ('tenente_coronel', 'Tenente-Coronel'),
         ('coronel', 'Coronel'),
+        ('general_brigada', 'General de Brigada'),
+        ('general_divisao', 'General de Divisão'),
+        ('general_exercito', 'General de Exército'),
+        ('marechal', 'Marechal'),
     ]
 
     nome = models.CharField(max_length=100)

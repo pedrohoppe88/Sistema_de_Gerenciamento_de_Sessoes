@@ -358,6 +358,30 @@ def gerar_relatorio_pdf(request, sessao_id):
     return response
 
 
+def editar_item(request, item_id):
+    item = get_object_or_404(Item, id=item_id)
+    sessao = item.sessao
+
+    # Verificar se o usuário tem acesso à sessão
+    if not request.session.get(f"sessao_{sessao.id}", False):
+        messages.error(request, "Você não tem permissão para editar itens nesta sessão.")
+        return redirect("listar_sessoes")
+
+    if request.method == "POST":
+        nome = request.POST.get("nome")
+        quantidade = int(request.POST.get("quantidade", 1))
+
+        if nome and quantidade > 0:
+            item.nome = nome
+            item.quantidade = quantidade
+            item.save()
+            messages.success(request, f"Item '{item.nome}' atualizado com sucesso!")
+            return redirect("listar_itens", sessao_id=sessao.id)
+        else:
+            messages.error(request, "Nome e quantidade são obrigatórios.")
+
+    return render(request, "usuarios/editar_item.html", {"item": item})
+
 def excluir_item(request, item_id):
     item = get_object_or_404(Item, id=item_id)
     sessao_id = item.sessao.id  # Salva o ID da sessão antes de excluir o item
