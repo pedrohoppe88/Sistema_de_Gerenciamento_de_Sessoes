@@ -287,8 +287,14 @@ def retirar_item(request, item_id):
     if request.method == "POST":
         usuario_id = request.POST.get("usuario")
         quantidade = int(request.POST.get("quantidade", 1))
+        pin_confirmacao = request.POST.get("pin_confirmacao")
 
         usuario = get_object_or_404(Usuario, id=usuario_id)
+
+        # Verificar PIN obrigatório do usuário selecionado
+        if not pin_confirmacao or pin_confirmacao != usuario.pin:
+            messages.error(request, f"PIN incorreto para {usuario.nome}. A retirada não foi autorizada.")
+            return redirect("listar_itens", sessao_id=item.sessao.id)
 
         if quantidade <= item.quantidade:
             # Verifica se já existe retirada para o mesmo usuário + item
@@ -308,6 +314,7 @@ def retirar_item(request, item_id):
             # Atualiza estoque
             item.quantidade -= quantidade
             item.save()
+            messages.success(request, f"Retirada registrada com sucesso para {usuario.nome}.")
         else:
             messages.error(request, "Quantidade solicitada maior que disponível.")
 

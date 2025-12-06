@@ -26,6 +26,7 @@ class Usuario(models.Model):
     nome = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
     senha = models.CharField(max_length=128)  # Em produção use hashing!
+    pin = models.CharField(max_length=4)  # PIN de 4 dígitos obrigatório para confirmação de retirada
     graduacao = models.CharField(max_length=20, choices=GRADUACAO_CHOICES)
     is_admin = models.BooleanField(default=False)
 
