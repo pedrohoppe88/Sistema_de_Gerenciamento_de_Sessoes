@@ -22,13 +22,14 @@
             left: 0;
             height: 100%;
             width: 250px;
-            background-color: #0d1b2a; /* azul escuro */
+            background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%); /* gradiente moderno */
             color: #fff;
             display: flex;
             flex-direction: column;
-            padding: 1.5rem 1rem;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.2);
+            padding: 2rem 1.5rem;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.3);
             z-index: 1030;
+            border-radius: 0 1rem 1rem 0;
         }
         .sidebar h2 {
             font-weight: 700;
@@ -346,18 +347,13 @@
     <aside class="sidebar">
         <h2>Dashboard</h2>
         <a href="{% url 'listar_sessoes' %}" class="btn btn-outline-light w-100 mb-3">← Voltar para Sessões</a>
-        <button class="btn btn-success w-100" data-bs-toggle="modal" data-bs-target="#modalCadastrarItem">
+        <button class="btn btn-success w-100 mb-3" data-bs-toggle="modal" data-bs-target="#modalCadastrarItem">
             ➕ Adicionar Item
-        </button>   
+        </button>
 
-  <div class="mb-3 d-flex justify-content-end">
-    <a href="{% url 'gerar_relatorio_pdf' sessao.id %}" class="btn btn-success" target="_blank">
-        📝 Gerar Relatório PDF
-    </a>
-</div>
-        
-        <div class="mb-3">
-</div>
+        <a href="{% url 'gerar_relatorio_pdf' sessao.id %}" class="btn btn-success w-100 mb-3" target="_blank">
+            📝 Gerar Relatório PDF
+        </a>
 
 
     </aside>
