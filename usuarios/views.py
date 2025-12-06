@@ -21,7 +21,10 @@ def cadastrar_usuario(request):
            # return redirect('sucesso')
     else:
         form = UsuarioForm()
-    return render(request, 'usuarios/cadastrar.html', {'form': form})
+    return render(request, 'usuarios/cadastrar.html', {
+        'form': form,
+        'graduacao_choices': Usuario.GRADUACAO_CHOICES
+    })
 
 def sucesso(request):
     if 'usuario_id' not in request.session:
