@@ -1,0 +1,12 @@
+{
+  "name": "projeto-django-cypress",
+  "version": "1.0.0",
+  "description": "Cypress tests for Django project",
+  "scripts": {
+    "cypress:run": "cypress run",
+    "cypress:open": "cypress open"
+  },
+  "devDependencies": {
+    "cypress": "^13.6.0"
+  }
+}
