@@ -206,7 +206,8 @@ Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalh
 
 **Pedro Hoppe**
 - 📧 pedrohenriquehoppe6@gmail.com
-- 🔗 [LinkedIn]([https://linkedin.com/in/pedro-hoppe](https://www.linkedin.com/in/pedro-henrique-hoppe-tavares-5b0344276/))
+- 🔗 [LinkedIn](https://www.linkedin.com/in/pedro-henrique-hoppe-tavares-5b0344276/)
+
 
 ## 🙏 Agradecimentos
 
