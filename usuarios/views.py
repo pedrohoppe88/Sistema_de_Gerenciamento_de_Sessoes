@@ -138,46 +138,11 @@ def adicionar_item(request, sessao_id):
         quantidade = int(request.POST.get("quantidade", 1))
         Item.objects.create(sessao=sessao, nome=nome, quantidade=quantidade)
 
-        # 🔹 Redireciona de volta para a página de itens
+        #  Redireciona de volta para a página de itens
         return redirect("listar_itens", sessao_id=sessao.id)
 
     # Se precisar de template separado (não usado no modal)
     return render(request, "adicionar_item.html", {"sessao": sessao})
-
-"""
-def cadastrar_usuario(request):
-    if request.method == 'POST':
-        form = UsuarioForm(request.POST)
-        if form.is_valid():
-            # Aqui você poderia hash a senha se quiser
-            form.save()
-            return redirect('login')
-           # return redirect('sucesso')
-    else:
-        form = UsuarioForm()
-    return render(request, 'usuarios/cadastrar.html', {'form': form})
-
--------------------------------
-
-def criar_sessao(request):
-    if 'usuario_id' not in request.session:
-        return redirect('login')
-    
-    if request.method == "POST":
-        nome = request.POST.get("nome")
-        senha = request.POST.get("senha")
-
-        if Sessao.objects.filter(nome=nome).exists():
-            messages.error(request, "Já existe uma sessão com esse nome.")
-        else:
-            Sessao.objects.create(nome=nome, senha=senha, criador=request.user)
-            messages.success(request, "Sessão criada com sucesso!")
-            return redirect("listar_sessoes")
-
-    return render(request, "usuarios/criar_sessao.html")
-
-
-"""
 
 def criar_sessao(request):
     if 'usuario_id' not in request.session:
@@ -574,3 +539,4 @@ def excluir_sessao(request, sessao_id):
     return render(request, 'usuarios/confirmar_exclusao_sessao.html', {
         'sessao': sessao
     })
+    

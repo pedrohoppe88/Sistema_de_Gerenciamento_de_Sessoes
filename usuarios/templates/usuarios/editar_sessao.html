@@ -1,12 +1,12 @@
 {% extends 'usuarios/base.html' %}
 
-{% block title %}Criar Nova Sessão{% endblock %}
+{% block title %}Editar Sessão{% endblock %}
 
 {% block content %}
 <div class="page-header">
     <div class="container">
-        <h1 class="page-title">Criar Nova Sessão</h1>
-        <p class="page-subtitle">Preencha os detalhes abaixo para criar uma nova sessão de gestão de itens.</p>
+        <h1 class="page-title">Editar Sessão</h1>
+        <p class="page-subtitle">Atualize as informações da sessão "{{ sessao.nome }}".</p>
     </div>
 </div>
 
@@ -23,7 +23,7 @@
                                 <i class="fas fa-tag me-2"></i>Nome da Sessão
                             </label>
                             <input type="text" name="nome" id="id_nome" class="form-control" required
-                                   placeholder="Digite o nome da sessão">
+                                   value="{{ sessao.nome }}" placeholder="Digite o nome da sessão">
                         </div>
 
                         <div class="mb-4">
@@ -31,12 +31,15 @@
                                 <i class="fas fa-lock me-2"></i>Senha da Sessão
                             </label>
                             <input type="password" name="senha" id="id_senha" class="form-control" required
-                                   placeholder="Digite uma senha segura">
+                                   value="{{ sessao.senha }}" placeholder="Digite uma senha segura">
                         </div>
 
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-plus-circle me-2"></i>Criar Sessão
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <a href="{% url 'admin_panel' %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-arrow-left me-2"></i>Cancelar
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Salvar Alterações
                             </button>
                         </div>
                     </form>
