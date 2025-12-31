@@ -5,27 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard de Usuários</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    .user-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    }
-    .stats-card {
-      transition: all 0.3s ease;
-    }
-    .stats-card:hover {
-      transform: scale(1.03);
-    }
-    @media (max-width: 768px) {
-      .responsive-table {
-        display: block;
-        overflow-x: auto;
-      }
-    }
-    .scrollbar-hide::-webkit-scrollbar {
-      display: none;
-    }
-  </style>
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/all_users.css' %}">
 </head>
 <body class="bg-gray-100 min-h-screen">
 

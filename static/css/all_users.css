@@ -1,0 +1,23 @@
+.user-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stats-card {
+  transition: all 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: scale(1.03);
+}
+
+@media (max-width: 768px) {
+  .responsive-table {
+    display: block;
+    overflow-x: auto;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

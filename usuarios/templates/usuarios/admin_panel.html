@@ -1,75 +1,11 @@
 {% extends 'usuarios/base.html' %}
+{% load static %}
 
 {% block title %}Painel de Administração{% endblock %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<style>
-    .page-header {
-        background: linear-gradient(135deg, #0d1b2a, #1b263b);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-        border-radius: 15px;
-    }
-    .page-title {
-        color: white !important;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    .card {
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-        background-color: #fff;
-        border: none;
-    }
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 25px rgb(0 0 0 / 0.15);
-    }
-    .btn-primary {
-        background-color: #3ac569;
-        border: none;
-        transition: background-color 0.3s ease;
-    }
-    .btn-primary:hover {
-        background-color: #2ea851;
-    }
-    .btn-danger {
-        background-color: #dc3545;
-        border: none;
-        transition: background-color 0.3s ease;
-    }
-    .btn-danger:hover {
-        background-color: #c82333;
-    }
-    .table th {
-        background-color: #f8f9fa;
-        border-top: none;
-        font-weight: 600;
-        color: #495057;
-    }
-    .table td {
-        vertical-align: middle;
-    }
-    .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border-radius: 0.75rem;
-        padding: 1.5rem;
-        text-align: center;
-        box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-    }
-    .stats-card h3 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-    .stats-card p {
-        font-size: 0.9rem;
-        opacity: 0.9;
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/admin_panel.css' %}">
 {% endblock %}
 
 {% block content %}
