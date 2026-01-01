@@ -12,13 +12,17 @@ from .models import Sessao, Item
 from django.db.models import Sum, Count
 
 def cadastrar_usuario(request):
+    """
+    Renderiza o formulário de cadastro de novo usuário e processa o envio.
+
+    Em caso de POST com dados válidos, salva o novo usuário e redireciona
+    para a página de login. Em caso de GET, apenas exibe o formulário em branco.
+    """
     if request.method == 'POST':
         form = UsuarioForm(request.POST)
         if form.is_valid():
-            # Aqui você poderia hash a senha se quiser
             form.save()
             return redirect('login')
-           # return redirect('sucesso')
     else:
         form = UsuarioForm()
     return render(request, 'usuarios/cadastrar.html', {
@@ -27,6 +31,13 @@ def cadastrar_usuario(request):
     })
 
 def sucesso(request):
+    """
+    Página de sucesso exibida após o login bem-sucedido.
+
+    Verifica se o usuário está logado através da sessão. Se não estiver,
+    redireciona para a página de login. Caso contrário, exibe uma mensagem
+    de boas-vindas com o nome e graduação do usuário.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
 
@@ -37,6 +48,13 @@ def sucesso(request):
     return render(request, 'usuarios/sucesso.html', {'usuario_id': usuario_id, 'graduacao': graduacao, 'nome': nome})
 
 def login_usuario(request):
+    """
+    Renderiza a página de login e processa a autenticação do usuário.
+
+    Em caso de POST, valida o email e a senha. Se as credenciais estiverem
+    corretas, armazena o ID do usuário na sessão e redireciona para a página
+    'sucesso'. Caso contrário, exibe mensagens de erro no formulário.
+    """
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
@@ -46,7 +64,7 @@ def login_usuario(request):
             try:
                 usuario = Usuario.objects.get(email=email)
                 if check_password(senha, usuario.senha):
-                    request.session['usuario_id'] = usuario.id  # salva sessão
+                    request.session['usuario_id'] = usuario.id
                     return redirect('sucesso')
                 else:
                     form.add_error('senha', 'Senha incorreta.')
@@ -57,16 +75,35 @@ def login_usuario(request):
     return render(request, 'usuarios/login.html', {'form': form})
 
 def logout_usuario(request):
-    request.session.flush()  # remove todas as sessões
+    """
+    Realiza o logout do usuário limpando todos os dados da sessão.
+
+    Após limpar a sessão, redireciona o usuário para a página de login.
+    """
+    request.session.flush()
     return redirect('login')
 
 def listar_usuarios(request):
+    """
+    Lista todos os usuários cadastrados.
+
+    Esta view é protegida e exige que o usuário esteja logado.
+    Busca todos os objetos Usuario e os envia para o template 'all_users.html'.
+    Nota: Funcionalidade similar a `all_users`.
+    """
     if 'usuario_id' not in request.session:
-        return redirect('login')  # protege a página
+        return redirect('login')
     usuarios = Usuario.objects.all()
     return render(request, 'usuarios/all_users.html', {'usuarios': usuarios})
 
 def all_users(request):
+    """
+    Exibe uma lista de todos os usuários com informações adicionais.
+
+    Protegida por login, esta view busca todos os usuários e também injeta
+    no contexto os dados do usuário logado (nome, graduação) e a contagem
+    total de usuários.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     usuarios = Usuario.objects.all()
@@ -84,15 +121,21 @@ def all_users(request):
     })
 
 def dashboard(request):
+    """
+    View para um painel de controle com estatísticas de usuários.
+
+    Nota: A view parece estar incompleta, pois não há um `return render`.
+    A lógica coleta estatísticas como total de usuários, usuários ativos
+    e cadastros recentes, preparando um contexto para ser renderizado.
+    """
     if 'usuario_id' not in request.session:
-        return redirect('login')  # protege a página
+        return redirect('login')
 
     usuarios = Usuario.objects.all()
 
-    # Contagem para os cards de estatísticas
     total_usuarios = usuarios.count()
-    usuarios_ativos = usuarios.filter(status='ativo').count()  # se você tiver campo status
-    graduados_recentes = usuarios.order_by('-id')[:5].count()  # últimos 5 cadastrados
+    usuarios_ativos = usuarios.filter(status='ativo').count()
+    graduados_recentes = usuarios.order_by('-id')[:5].count()
 
     context = {
         'usuarios': usuarios,
@@ -100,24 +143,37 @@ def dashboard(request):
         'usuarios_ativos': usuarios_ativos,
         'graduados_recentes': graduados_recentes,
     }
-    
-    
+    # Falta o `return render(request, 'template.html', context)`
+
 def entrar_sessao(request, sessao_id):
+    """
+    Processa a entrada em uma sessão protegida por senha.
+
+    Recebe um POST com a senha. Se a senha corresponder à da sessão,
+    uma flag é definida na sessão do usuário para autorizar o acesso
+    e ele é redirecionado para os detalhes da sessão. Caso contrário,
+    uma mensagem de erro é exibida.
+    """
     sessao = get_object_or_404(Sessao, id=sessao_id)
     
     if request.method  == "POST":
         senha = request.POST.get('senha')
         if sessao.senha == senha:
-            request.session[f"sessao_{sessao.id}"] = True;
+            request.session[f"sessao_{sessao.id}"] = True
             return redirect('detalhes_sessao', sessao_id=sessao.id)
         else:
             messages.error(request, 'Senha incorreta.')
             return render(request, "entrar_sessao.html", {"sessao": sessao})
     
 def detalhes_sessao(request, sessao_id):
+    """
+    Exibe os detalhes e os itens de uma sessão específica.
+
+    O acesso é permitido apenas se o usuário for o criador da sessão ou
+    se tiver inserido a senha correta (verificado pela flag na sessão).
+    """
     sessao = get_object_or_404(Sessao, id=sessao_id)
 
-    # Só entra se for admin ou se tiver a senha
     if not request.user == sessao.criador and not request.session.get(f"sessao_{sessao.id}", False):
         messages.error(request, "Acesso negado!")
         return redirect("entrar_sessao", sessao_id=sessao.id)
@@ -126,9 +182,15 @@ def detalhes_sessao(request, sessao_id):
     return render(request, "detalhes_sessao.html", {"sessao": sessao, "itens": itens})
 
 def adicionar_item(request, sessao_id):
+    """
+    Adiciona um novo item a uma sessão específica.
+
+    Disponível apenas para o criador da sessão ou para quem entrou com a senha.
+    Processa um POST para criar um novo `Item` associado à sessão e
+    redireciona para a lista de itens da mesma.
+    """
     sessao = get_object_or_404(Sessao, id=sessao_id)
 
-    # Proteção: só o criador ou quem entrou na sessão pode adicionar
     if not request.user == sessao.criador and not request.session.get(f"sessao_{sessao.id}", False):
         messages.error(request, "Você não tem permissão!")
         return redirect("entrar_sessao", sessao_id=sessao.id)
@@ -138,13 +200,17 @@ def adicionar_item(request, sessao_id):
         quantidade = int(request.POST.get("quantidade", 1))
         Item.objects.create(sessao=sessao, nome=nome, quantidade=quantidade)
 
-        #  Redireciona de volta para a página de itens
         return redirect("listar_itens", sessao_id=sessao.id)
 
-    # Se precisar de template separado (não usado no modal)
     return render(request, "adicionar_item.html", {"sessao": sessao})
 
 def criar_sessao(request):
+    """
+    Renderiza e processa o formulário para criação de uma nova sessão.
+
+    Acesso restrito a administradores. Em caso de POST com dados válidos,
+    salva a nova sessão associada ao administrador logado.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
 
@@ -167,10 +233,16 @@ def criar_sessao(request):
     return render(request, "usuarios/criar_sessao.html", {'form': form})
 
 def mostrar_sessao(request):
+    """
+    View de depuração simples para exibir o ID do usuário logado na sessão.
+    """
     usuario_id = request.session.get('usuario_id')
     return HttpResponse(f"Usuário logado (usuario_id): {usuario_id}")
 
 def listar_sessoes(request):
+    """
+    Exibe todas as sessões cadastradas para usuários logados.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     sessoes = Sessao.objects.all()
@@ -179,12 +251,20 @@ def listar_sessoes(request):
     return render(request, 'usuarios/listar_sessoes.html', {'sessoes': sessoes, 'usuario': usuario})
 
 def listar_itens(request, sessao_id):
+    """
+    View principal de uma sessão, listando seus itens e permitindo retiradas.
+
+    Para GET, exibe os itens da sessão, bem como uma lista de todos os usuários
+    para seleção na hora da retirada.
+    Para POST, processa a retirada de um item: cria ou atualiza um registro
+    de `Retirada` e debita a quantidade do estoque do `Item`.
+    O acesso é protegido pela flag de sessão `sessao_{sessao.id}`.
+    """
     sessao = get_object_or_404(Sessao, id=sessao_id)
 
     if not request.session.get(f"sessao_{sessao.id}", False):
         return redirect("listar_sessoes")
 
-    # Processa retirada se for POST (chama a lógica de retirar_item)
     if request.method == "POST" and 'retirar_item' in request.POST:
         item_id = request.POST.get("item_id")
         usuario_id = request.POST.get("usuario")
@@ -193,7 +273,6 @@ def listar_itens(request, sessao_id):
         usuario = get_object_or_404(Usuario, id=usuario_id)
 
         if quantidade <= item.quantidade:
-            # Verifica se já existe retirada para o mesmo usuário + item
             retirada_existente = Retirada.objects.filter(item=item, usuario=usuario).first()
 
             if retirada_existente:
@@ -206,7 +285,6 @@ def listar_itens(request, sessao_id):
                 quantidade=quantidade
             )
 
-            # Atualiza estoque
             item.quantidade -= quantidade
             item.save()
         else:
@@ -220,18 +298,23 @@ def listar_itens(request, sessao_id):
         "itens": itens,
         "usuarios": usuarios
     })
-    
 
 from django.http import JsonResponse
 from django.urls import reverse
 
 def validar_sessao(request, sessao_id):
+    """
+    Endpoint AJAX para validar a senha de uma sessão de forma assíncrona.
+
+    Recebe um POST com a senha e retorna um JSON indicando sucesso ou falha.
+    Se a senha for válida, define a flag de autorização na sessão do usuário
+    e retorna a URL de redirecionamento para a lista de itens.
+    """
     if request.method == "POST":
         sessao = get_object_or_404(Sessao, id=sessao_id)
         senha = request.POST.get("senha")
 
-        if senha == sessao.senha:  # ⚠️ use hash em produção
-            # salva login na sessão do usuário
+        if senha == sessao.senha:
             request.session[f"sessao_{sessao.id}"] = True  
 
             return JsonResponse({
@@ -247,6 +330,13 @@ def validar_sessao(request, sessao_id):
     return JsonResponse({"success": False, "error": "Método inválido."}, status=400)
 
 def retirar_item(request, item_id):
+    """
+    Processa a retirada de um item, exigindo confirmação por PIN do usuário.
+
+    Recebe um POST com o ID do usuário, a quantidade e o PIN de confirmação.
+    Se o PIN corresponder ao do usuário, a retirada é registrada e o estoque
+    do item é atualizado. Caso contrário, uma mensagem de erro é exibida.
+    """
     item = get_object_or_404(Item, id=item_id)
 
     if request.method == "POST":
@@ -256,13 +346,11 @@ def retirar_item(request, item_id):
 
         usuario = get_object_or_404(Usuario, id=usuario_id)
 
-        # Verificar PIN obrigatório do usuário selecionado
         if not pin_confirmacao or pin_confirmacao != usuario.pin:
             messages.error(request, f"PIN incorreto para {usuario.nome}. A retirada não foi autorizada.")
             return redirect("listar_itens", sessao_id=item.sessao.id)
 
         if quantidade <= item.quantidade:
-            # Verifica se já existe retirada para o mesmo usuário + item
             retirada_existente = Retirada.objects.filter(item=item, usuario=usuario).first()
 
             if retirada_existente:
@@ -276,7 +364,6 @@ def retirar_item(request, item_id):
                     data_retirada=timezone.now()
                 )
 
-            # Atualiza estoque
             item.quantidade -= quantidade
             item.save()
             messages.success(request, f"Retirada registrada com sucesso para {usuario.nome}.")
@@ -286,6 +373,13 @@ def retirar_item(request, item_id):
         return redirect("listar_itens", sessao_id=item.sessao.id)
 
 def remover_retirada(request, retirada_id):
+    """
+    Reverte uma retirada, devolvendo a quantidade ao estoque do item.
+
+    Pode remover a retirada inteira ou uma quantidade parcial, dependendo do
+    que for enviado no POST. Após a operação, retorna o item ao estoque e
+    redireciona para a página anterior ou para a lista de itens.
+    """
     retirada = get_object_or_404(Retirada, id=retirada_id)
     item = retirada.item
     if request.method == "POST":
@@ -296,7 +390,6 @@ def remover_retirada(request, retirada_id):
             item.save()
             retirada.delete()
         else:
-            # Remove apenas parte da retirada
             item.quantidade += qtd_remover
             item.save()
             retirada.quantidade -= qtd_remover
@@ -313,6 +406,13 @@ from xhtml2pdf import pisa
 from .models import Retirada
 
 def gerar_relatorio_pdf(request, sessao_id):
+    """
+    Gera um relatório em PDF das cautelas (retiradas) de uma sessão.
+
+    Renderiza um template HTML com os dados da sessão e suas retiradas,
+    e usa a biblioteca xhtml2pdf para converter o HTML em um arquivo PDF,
+    que é retornado como resposta para download.
+    """
     sessao = get_object_or_404(Sessao, id=sessao_id)
     
     template_path = 'usuarios/relatorio_cautelas.html'
@@ -331,10 +431,15 @@ def gerar_relatorio_pdf(request, sessao_id):
 
 
 def editar_item(request, item_id):
+    """
+    Renderiza e processa o formulário para editar um item existente.
+
+    O acesso é protegido pela flag de sessão. Em caso de POST, atualiza
+    o nome e a quantidade do item.
+    """
     item = get_object_or_404(Item, id=item_id)
     sessao = item.sessao
 
-    # Verificar se o usuário tem acesso à sessão
     if not request.session.get(f"sessao_{sessao.id}", False):
         messages.error(request, "Você não tem permissão para editar itens nesta sessão.")
         return redirect("listar_sessoes")
@@ -355,14 +460,28 @@ def editar_item(request, item_id):
     return render(request, "usuarios/editar_item.html", {"item": item})
 
 def excluir_item(request, item_id):
+    """
+    Processa a exclusão de um item após confirmação.
+
+    Para GET, exibe uma página de confirmação.
+    Para POST, deleta o item do banco de dados e redireciona para a lista
+    de itens da sessão correspondente.
+    """
     item = get_object_or_404(Item, id=item_id)
-    sessao_id = item.sessao.id  # Salva o ID da sessão antes de excluir o item
+    sessao_id = item.sessao.id
     if request.method == "POST":
         item.delete()
-        return redirect("listar_itens", sessao_id=sessao_id)  # Redireciona usando o ID salvo
+        return redirect("listar_itens", sessao_id=sessao_id)
     return render(request, "usuarios/confirmar_exclusao.html", {"item": item})
 
 def admin_panel(request):
+    """
+    Painel de controle principal para administradores.
+
+    Acesso restrito a usuários com a flag `is_admin`. Coleta diversas
+    estatísticas sobre itens, retiradas, sessões e usuários para
+    exibição em cards e gráficos no template `admin_panel.html`.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     usuario_id = request.session.get('usuario_id')
@@ -371,31 +490,25 @@ def admin_panel(request):
         messages.error(request, "Acesso negado. Você não tem permissão de administrador.")
         return redirect('listar_sessoes')
 
-    # Estatísticas gerais
     total_itens = Item.objects.count()
     total_retiradas = Retirada.objects.aggregate(total=Sum('quantidade'))['total'] or 0
     porcentagem_cautelados = (total_retiradas / total_itens * 100) if total_itens > 0 else 0
 
-    # Sessões com mais retiradas
     sessoes_com_mais_retiradas = Sessao.objects.annotate(
         total_retiradas=Sum('itens__retiradas__quantidade')
     ).filter(total_retiradas__gt=0).order_by('-total_retiradas')[:5]
 
-    # Item mais cautelado
     item_mais_cautelado = Item.objects.annotate(
         total_retiradas=Sum('retiradas__quantidade')
     ).filter(total_retiradas__gt=0).order_by('-total_retiradas').first()
 
-    # Dados para gráficos
     sessoes_labels = [sessao.nome for sessao in sessoes_com_mais_retiradas]
     sessoes_data = [sessao.total_retiradas for sessao in sessoes_com_mais_retiradas]
 
-    # Dados para gráfico de usuários por graduação
     graduacoes = Usuario.objects.values('graduacao').annotate(count=Count('graduacao')).order_by('graduacao')
     usuarios_labels = [graduacao['graduacao'] for graduacao in graduacoes]
     usuarios_data = [graduacao['count'] for graduacao in graduacoes]
 
-    # Dados para gráfico de itens por sessão
     itens_por_sessao = Sessao.objects.annotate(total_itens=Count('itens')).values('nome', 'total_itens')
     itens_sessao_labels = [sessao['nome'] for sessao in itens_por_sessao]
     itens_sessao_data = [sessao['total_itens'] for sessao in itens_por_sessao]
@@ -419,6 +532,13 @@ def admin_panel(request):
 
 
 def editar_usuario(request, usuario_id):
+    """
+    Renderiza e processa o formulário de edição de um usuário.
+
+    Acesso restrito a administradores. Para GET, exibe o formulário
+    `UsuarioEditForm` preenchido com os dados do usuário. Para POST,
+    salva as alterações.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     usuario_logado = Usuario.objects.get(id=request.session['usuario_id'])
@@ -444,6 +564,12 @@ def editar_usuario(request, usuario_id):
 
 
 def excluir_usuario(request, usuario_id):
+    """
+    Processa a exclusão de um usuário após confirmação.
+
+    Acesso restrito a administradores. Para GET, mostra uma página de
+    confirmação. Para POST, deleta o usuário e redireciona para o painel de admin.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     usuario_logado = Usuario.objects.get(id=request.session['usuario_id'])
@@ -464,6 +590,12 @@ def excluir_usuario(request, usuario_id):
 
 
 def excluir_usuario_ajax(request):
+    """
+    Endpoint AJAX para excluir um usuário de forma assíncrona.
+
+    Acesso restrito a administradores. Recebe um POST com o `usuario_id`,
+    deleta o usuário e retorna uma resposta JSON com status de sucesso.
+    """
     if request.method == 'POST':
         if 'usuario_id' not in request.session:
             return JsonResponse({'success': False, 'error': 'Não autorizado'})
@@ -479,6 +611,12 @@ def excluir_usuario_ajax(request):
     return JsonResponse({'success': False, 'error': 'Método inválido'})
 
 def excluir_sessao_ajax(request):
+    """
+    Endpoint AJAX para excluir uma sessão de forma assíncrona.
+
+    Acesso restrito a administradores. Recebe um POST com o `sessao_id`,
+    deleta a sessão e retorna uma resposta JSON com status de sucesso.
+    """
     if request.method == 'POST':
         if 'usuario_id' not in request.session:
             return JsonResponse({'success': False, 'error': 'Não autorizado'})
@@ -494,6 +632,12 @@ def excluir_sessao_ajax(request):
     return JsonResponse({'success': False, 'error': 'Método inválido'})
 
 def editar_sessao(request, sessao_id):
+    """
+    Renderiza e processa o formulário para editar uma sessão existente.
+
+    Acesso restrito a administradores. Para GET, exibe um formulário para
+    alterar o nome e a senha da sessão. Para POST, salva as alterações.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     usuario_logado = Usuario.objects.get(id=request.session['usuario_id'])
@@ -522,6 +666,12 @@ def editar_sessao(request, sessao_id):
 
 
 def excluir_sessao(request, sessao_id):
+    """
+    Processa a exclusão de uma sessão após confirmação.
+
+    Acesso restrito a administradores. Para GET, mostra uma página de
+    confirmação. Para POST, deleta a sessão e redireciona para o painel de admin.
+    """
     if 'usuario_id' not in request.session:
         return redirect('login')
     usuario_logado = Usuario.objects.get(id=request.session['usuario_id'])
