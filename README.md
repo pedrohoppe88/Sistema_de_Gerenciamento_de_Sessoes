@@ -197,15 +197,6 @@ ALLOWED_HOSTS=seu-dominio.com
 - 🔗 [LinkedIn](https://www.linkedin.com/in/pedro-henrique-hoppe-tavares-5b0344276/)
 
 
-## 🙏 Agradecimentos
-
-- Django Framework pela poderosa estrutura web
-- Bootstrap pela interface responsiva
-- Chart.js pelos gráficos interativos
-- Comunidade open source
-
----
-
 ⭐ **Dê uma estrela se este projeto te ajudou!**
 
 <div align="center">
