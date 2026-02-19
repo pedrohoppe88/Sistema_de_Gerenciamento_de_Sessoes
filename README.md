@@ -192,7 +192,7 @@ ALLOWED_HOSTS=seu-dominio.com
 
 ## 👨‍💻 Autor
 
-**Pedro Hoppe**
+**Pedro Henrique Hoppe Tavares**
 - 📧 pedrohenriquehoppe6@gmail.com
 - 🔗 [LinkedIn](https://www.linkedin.com/in/pedro-henrique-hoppe-tavares-5b0344276/)
 
